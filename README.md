@@ -69,6 +69,23 @@ Note that you can specify via the ```optimizeBy```-parameter, whether you want t
 As result you'll receive a JSON-response with an ordered list of travel points, similar to the following:
 
 ```json
+{
+  "result": {
+    "Route": {
+      "0": "Walter-Gropius-Straße 5, 80807 München",
+      "1": "Meitnerstraße 9, 70563 Stuttgart",
+      "2": "Altrottstraße 31, 69190 Walldorf",
+      "3": "Friedrich-Ebert-Anlage 49, 60308 Frankfurt",
+      "4": "Holzmarkt 2a, 50676 Köln",
+      "5": "Axel-Springer-Platz 3, 20355 Hamburg",
+      "6": "Unter den Linden 17, 10117 Berlin",
+      "7": "Walter-Gropius-Straße 5, 80807 München"
+    },
+    "RouteCost": {
+      "Cost": 62563.0
+    }
+  }
+}
 ```
 
 ### Clean up resources
