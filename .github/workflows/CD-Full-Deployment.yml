@@ -1,0 +1,77 @@
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'env/**'
+      - 'src/**'
+      - '**/CD-Full-Deployment.yml'
+
+name: CD Full Deployment
+env:
+  AZURE_RESOURCE_GROUP_NAME: traveling-salesperson-rg
+  AZURE_RESOURCE_GROUP_LOCATION: eastus
+  APP_NAME: travelingsp
+  AZURE_FUNCTIONAPP_NAME: travelingsp
+  AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/Function.JobManagement'
+  PYTHON_VERSION: '3.9'
+jobs:
+  deploy-arm-template:
+    name: Deploy ARM Template
+    runs-on: ubuntu-latest
+    steps:
+
+      # Checkout main
+    - name: Checkout main
+      uses: actions/checkout@main
+
+      # Log into Azure
+    - name: Log into Azure
+      uses: azure/login@v1
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      # Create the resource group (ignore if exists)
+    - name: Create the resource group (ignore if exists)
+      uses: Azure/CLI@v1
+      with:
+        inlineScript: |
+          #!/bin/bash
+          az group create --name ${{ env.AZURE_RESOURCE_GROUP_NAME }} --location ${{ env.AZURE_RESOURCE_GROUP_LOCATION }}
+
+      # Deploy basic infrastructure (ARM deploy)
+    - name: Deploy basic infrastructure (ARM deploy)
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+        resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+        template: ./env/azuredeploy.json
+        parameters: appName=${{ env.APP_NAME }} location=${{ env.AZURE_RESOURCE_GROUP_LOCATION }}
+    
+    - name: Setup Python ${{ env.PYTHON_VERSION }} Environment
+      uses: actions/setup-python@v1
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+
+    - name: 'Resolve Project Dependencies Using Pip'
+      shell: bash
+      run: |
+        pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt --target=".python_packages/lib/site-packages"
+        popd
+
+    - name: 'Deploy the Functions App'
+      uses: Azure/functions-action@v1
+      id: fa
+      with:
+        app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+        package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+
+      # Configure RBAC on infrastructure resources
+    - name: Configure RBAC on infrastructure resources
+      uses: azure/arm-deploy@v1
+      with:
+        subscriptionId: ${{ secrets.AZURE_SUBSCRIPTION }}
+        resourceGroupName: ${{ env.AZURE_RESOURCE_GROUP_NAME }}
+        template: ./env/azuredeploy.rbac.json
+        parameters: appName=${{ env.APP_NAME }} location=${{ env.AZURE_RESOURCE_GROUP_LOCATION }}

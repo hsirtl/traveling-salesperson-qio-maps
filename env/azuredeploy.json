@@ -1,0 +1,174 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "appName": {
+            "type": "string",
+            "defaultValue": "travelingsp"
+        },
+        "location": {
+            "type": "string",
+            "defaultValue": "westeurope",
+            "allowedValues" : [
+                "eastus",
+                "japaneast",
+                "japanwest",
+                "northeurope",
+                "uksouth",
+                "ukwest",
+                "westcentralus",
+                "westeurope",
+                "westus",
+                "westus2"
+            ]
+        }
+    },
+    "variables": {
+        "functionAppName": "[parameters('appName')]",
+        "workspaceName": "[concat(parameters('appName'),'-qws')]",
+        "storageAccountName": "[format('{0}{1}', parameters('appName'), substring(uniqueString(resourceGroup().id), 0, 5))]",
+        "mapName": "[concat(parameters('appName'),'-map')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "apiVersion": "2021-06-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS",
+                "tier": "Standard"
+            },
+            "kind": "StorageV2"
+        },
+        {
+            "name": "[concat(variables('storageAccountName'),'/default/optimization-problems')]",
+            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
+            "apiVersion": "2018-07-01",
+            "properties": {
+                "publicAccess": "None"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
+            ]
+        },
+        {
+            "type": "Microsoft.Quantum/Workspaces",
+            "apiVersion": "2019-11-04-preview",
+            "name": "[variables('workspaceName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "providers": [
+                    {
+                        "providerId": "Microsoft",
+                        "providerSku": "DZH3178M639F",
+                        "applicationName": "[concat(variables('workspaceName'), '-Microsoft')]"
+                    }
+                ],
+                "storageAccount": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            }
+        },
+        {
+            "type": "Microsoft.Maps/accounts",
+            "apiVersion": "2021-12-01-preview",
+            "name": "[variables('mapName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "G2",
+                "tier": "Standard"
+            },
+            "kind": "Gen2",
+            "identity": {
+                "type": "None"
+            },
+            "properties": {
+                "disableLocalAuth": false
+            }
+        },
+        {
+            "name": "[variables('functionAppName')]",
+            "type": "microsoft.insights/components",
+            "location": "[parameters('location')]",
+            "apiVersion": "2014-04-01",
+            "properties": {
+                "ApplicationId": "[variables('functionAppName')]",
+                "Application_Type": "web",
+                "Flow_Type": "Redfield"
+            }
+        },
+        {
+            "type": "Microsoft.Web/sites",
+            "apiVersion": "2021-02-01",
+            "name": "[variables('functionAppName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                "[resourceId('Microsoft.Quantum/Workspaces', variables('workspaceName'))]"
+            ],
+            "kind": "functionapp,linux",
+            "identity": {
+                "type": "SystemAssigned"
+            },
+            "properties": {
+                "siteConfig": {
+                    "numberOfWorkers": 1,
+                    "use32BitWorkerProcess": false,
+                    "linuxFxVersion": "python|3.9",
+                    "appSettings": [
+                        {
+                        "name": "FUNCTIONS_EXTENSION_VERSION",
+                        "value": "~3"
+                        },
+                        {
+                        "name": "WEBSITE_NODE_DEFAULT_VERSION",
+                        "value": "~10"
+                        },
+                        {
+                        "name": "FUNCTIONS_WORKER_RUNTIME",
+                        "value": "python"
+                        },
+                        {
+                        "name": "AzureWebJobsStorage",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
+                        },
+                        {
+                        "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+                        "value": "[reference(concat('microsoft.insights/components/', variables('functionAppName'))).InstrumentationKey]"
+                        },
+                        {
+                        "name": "StorageConnection",
+                        "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';EndpointSuffix=', environment().suffixes.storage, ';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value)]"
+                        },
+                        {
+                        "name": "AzureMapsSubscriptionKey",
+                        "value": "[listKeys(resourceId('Microsoft.Maps/accounts', variables('mapName')), providers('Microsoft.Maps', 'accounts').apiVersions[0]).primaryKey]"
+                        },
+                        {
+                        "name": "SubscriptionId",
+                        "value": "[subscription().subscriptionId]"
+                        },
+                        {
+                        "name": "ResourceGroup",
+                        "value": "[resourceGroup().name]"
+                        },
+                        {
+                        "name": "WorkspaceName",
+                        "value": "[variables('workspaceName')]"
+                        },
+                        {
+                        "name": "WorkspaceLocation",
+                        "value": "[parameters('location')]"
+                        }
+                    ]
+                },
+                "reserved": true
+            }
+        }
+    ]
+}
