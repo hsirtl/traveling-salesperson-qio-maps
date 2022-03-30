@@ -42,17 +42,6 @@
             "kind": "StorageV2"
         },
         {
-            "name": "[concat(variables('storageAccountName'),'/default/optimization-problems')]",
-            "type": "Microsoft.Storage/storageAccounts/blobServices/containers",
-            "apiVersion": "2018-07-01",
-            "properties": {
-                "publicAccess": "None"
-            },
-            "dependsOn": [
-                "[concat('Microsoft.Storage/storageAccounts/', variables('storageAccountName'))]"
-            ]
-        },
-        {
             "type": "Microsoft.Quantum/Workspaces",
             "apiVersion": "2019-11-04-preview",
             "name": "[variables('workspaceName')]",

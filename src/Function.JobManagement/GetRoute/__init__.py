@@ -41,37 +41,20 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     extDestinations = maps.addCoordinates(destinations)
     costMatrix = maps.getCostMatrix(extDestinations, inputProblemCrit)
 
-    terms = []
-
     # Create cost function based on inputBlobData problem description
-    if inputProblemType == "travelingsalesperson":
-        terms = travelingsalesperson.createCostFunction({ 'nodes': destinations, 'distances': costMatrix})
+    terms = travelingsalesperson.createCostFunction({ 'nodes': destinations, 'distances': costMatrix})
 
+    # configure the problem and submit it to an optimization solver
     problem = Problem(name=inputProblemType, problem_type=ProblemType.pubo, terms=terms)
     solver = SimulatedAnnealing(workspace, timeout=100, seed=22)
-    
     resultRawData = solver.optimize(problem)
 
-    print(f'Result Raw Data: {resultRawData}')
-
-    receiptData = {}
-    receiptData["problem_type"] = inputProblemType
-    receiptData["problem_crit"] = inputProblemCrit
-    receiptData["destinations"] = extDestinations
-    receiptData["distances"] = costMatrix
-    receiptData["no_of_terms"] = str(len(terms))
-
-    logging.info('Uploaded problem type: %s', inputProblemType)
-
-    resultData = []
     nodes = inputProblemData.get('destinations')
-    distances = receiptData.get('distances')
 
     # depending on the problem type extract business solution from job result
-    resultData = travelingsalesperson.extractSolution({ 'nodes': nodes, 'distances': distances }, resultRawData)
+    resultData = travelingsalesperson.extractSolution({ 'nodes': nodes, 'distances': costMatrix }, resultRawData)
 
     solutionData = {}
-    #solutionData["receipt"] = receiptData
     solutionData["result"] = resultData
 
     return func.HttpResponse(json.dumps(solutionData), status_code=200)
