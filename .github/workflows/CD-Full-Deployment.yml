@@ -11,7 +11,7 @@ env:
   AZURE_RESOURCE_GROUP_NAME: quantum_showcase_simon
   AZURE_RESOURCE_GROUP_LOCATION: westeurope
   APP_NAME: travelingsp
-  AZURE_FUNCTIONAPP_NAME: travelingsp
+  AZURE_FUNCTIONAPP_NAME: tsp_qio
   AZURE_FUNCTIONAPP_PACKAGE_PATH: './src/Function.JobManagement'
   PYTHON_VERSION: '3.9'
 jobs:
