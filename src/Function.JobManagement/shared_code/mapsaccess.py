@@ -32,11 +32,8 @@ def getRoute(latStart, lonStart, latEnd, lonEnd):
 def addCoordinates(destinations):
     extDestinations = []
     for destination in destinations:
-        if type(destination) is dict : 
-            extDestinations.append(destination)
-        else :
-            (lat, lon) = getLatLon(destination)
-            extDestinations.append( { 'address': destination , 'lat': lat, 'lon': lon } )
+        (lat, lon) = getLatLon(destination)
+        extDestinations.append( { 'address': destination , 'lat': lat, 'lon': lon } )
 
     return extDestinations
 

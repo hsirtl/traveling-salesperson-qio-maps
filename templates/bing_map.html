@@ -220,10 +220,11 @@
             }
 
             for (var i = 0; i < markers.length; i++) {
-                coordinates = markers[i].getCoordinates()
-                body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress, 'lat': coordinates[1], 'lon': coordinates[0] })
+                //coordinates = markers[i].getCoordinates()
+               // body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress, 'lat': coordinates[1], 'lon': coordinates[0] })
+               body.problem.data.destinations.push(markers[i].data.properties.address.freeformAddress)
             }
-
+/*
             $.ajax({
                 type: "POST",
                 url: "https://tspqio.azurewebsites.net/api/GetRoute",
@@ -235,8 +236,8 @@
                 error: function (errMsg) {
                     alert(errMsg);
                 }
-            });
-            console.log(data)
+            });*/
+            console.log(body)
         }
 
 
