@@ -38,7 +38,13 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     inputProblemData = inputProblem.get("data")
 
     destinations = inputProblemData.get("destinations")
-    extDestinations = maps.addCoordinates(destinations)
+
+    # check if lat/lon information is already included
+    if len(destinations[0]) > 1:
+        extDestinations = destinations
+    else :
+        extDestinations = maps.addCoordinates(destinations)
+        
     costMatrix = maps.getCostMatrix(extDestinations, inputProblemCrit)
 
     # Create cost function based on inputBlobData problem description
