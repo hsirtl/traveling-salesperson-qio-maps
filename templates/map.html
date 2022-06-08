@@ -1,0 +1,66 @@
+<html>  
+<head>
+<meta name="viewport" content="initial-scale=1.0, width=device-width" />
+<script src="https://js.api.here.com/v3/3.1/mapsjs-core.js"type="text/javascript" charset="utf-8"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-service.js"type="text/javascript" charset="utf-8"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-mapevents.js" type="text/javascript" charset="utf-8"></script>
+<script src="https://js.api.here.com/v3/3.1/mapsjs-ui.js" type="text/javascript" charset="utf-8"></script>
+<link rel="stylesheet" type="text/css"href="https://js.api.here.com/v3/3.1/mapsjs-ui.css" />
+</head>
+  
+<body style='margin: 0'>
+<div style="width: 100%; height: 100%" id="mapContainer"></div>
+
+<script>	
+      // Initialize the platform object:
+      var platform = new H.service.Platform({
+        'apikey': 'LFPwY4K66drD1X7mkvfSN8WRa2_SLOXPXfhtsMkzhsI'
+      });
+	  
+	   const lat = 22.719568;
+	   const long = 75.857727;
+	
+	// Obtain the default map types from the platform object
+      var maptypes = platform.createDefaultLayers();
+
+      // Initialize a map:
+      var map = new H.Map(
+        document.getElementById('mapContainer'),
+        maptypes.raster.terrain.map,
+        {
+          zoom: 10,
+          center: { lat: lat, lng: long }  
+        });
+		
+	// Enable the event system on the map instance:
+	  var mapEvents = new H.mapevents.MapEvents(map);
+	
+	// Add event listener:
+	  map.addEventListener('tap', function(evt) {
+    // Log 'tap' and 'mouse' events:
+      console.log(evt.type, evt.currentPointer.type); 
+});
+
+	// Instantiate the default behavior, providing the mapEvents object:
+	 var behavior = new H.mapevents.Behavior(mapEvents);
+
+	//window.addEventListener('resize',()=> get.ViewProt().resize())
+	var marker = new H.map.Marker({ lat: lat, lng: long });
+		
+	// Add the marker to the map:
+	map.addObject(marker);
+	
+	// Create the default UI:
+	var ui = H.ui.UI.createDefault(map, maptypes);
+		
+// Create an info bubble object at a specific geographic location:
+var bubble = new H.ui.InfoBubble({ lng: 76.0534, lat: 22.9676 }, {
+                content: '<b>Dewas</b>'
+             });
+
+// Add info bubble to the UI:
+ui.addBubble(bubble);
+
+</script>
+</body>
+</html>
