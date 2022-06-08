@@ -91,7 +91,7 @@
                     popup.close();
                     resultsPanel.innerHTML = '';
                 });
-                
+
                 //Add a click event to the search layer and show a popup when a result is clicked.
                 map.events.add("click", searchLayer, function (e) {
                     //Make sure the event occurred on a shape feature.
@@ -204,6 +204,26 @@
                 content: html.join('')
             });
             popup.open(map);
+        }
+        
+        function runOptimization(){
+            markers = clicked_markers.getShapes()
+            body = {
+                "problem": {
+                    "type": "travelingsalesperson",
+                    "optimizeBy": "travelTimeInSeconds",
+                    "data": {
+                        "destinations": [
+                        ]
+                    }
+                } 
+}
+
+            for (var i = 0; i < markers.length; i++) {
+                coordinates = markers[i].getCoordinates()
+                body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress , 'lat': coordinates[1], 'lon': coordinates[0] })
+            }
+            console.log(body)
         }
 
 
@@ -384,6 +404,8 @@
             </div>
         </div>
         <ul id="results-panel"></ul>
+        <input id="Run" type="button" value="Run Optimization" onclick="runOptimization()" >
     </div>
+
 </body>
 </html>
