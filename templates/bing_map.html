@@ -19,6 +19,7 @@
     <!-- Add a reference to the Azure Maps Services Module JavaScript file. -->
     <script src="https://atlas.microsoft.com/sdk/javascript/service/2/atlas-service.min.js"></script>
 
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script type="text/javascript">
         var map, datasource, clicked_markers, client, popup, searchInput, resultsPanel, searchInputLength, centerMapOnResults;
 
@@ -37,7 +38,7 @@
                 language: 'en-US',
                 authOptions: {
                     authType: 'subscriptionKey',
-                    subscriptionKey: ''
+                    subscriptionKey: 'fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U'
                 }
             });
 
@@ -224,19 +225,19 @@
                // body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress, 'lat': coordinates[1], 'lon': coordinates[0] })
                body.problem.data.destinations.push(markers[i].data.properties.address.freeformAddress)
             }
-/*
+
             $.ajax({
                 type: "POST",
                 url: "https://tspqio.azurewebsites.net/api/GetRoute",
                 // The key needs to match your method's input parameter (case-sensitive).
                 data: JSON.stringify(body),
-                contentType: "application/json; charset=utf-8",
+                contentType: "application/json",
                 dataType: "json",
-                success: function (data) { alert(data); },
+                success: function (data) { console.log(data); },
                 error: function (errMsg) {
                     alert(errMsg);
                 }
-            });*/
+            });
             console.log(body)
         }
 
