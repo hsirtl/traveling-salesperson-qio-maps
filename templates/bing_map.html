@@ -65,14 +65,19 @@
                 //Create a data source and add it to the map.
                 datasource = new atlas.source.DataSource();
                 map.sources.add(datasource);
+                
+
+                //Create a second data source and add it to the map. Here only the selected markers are stored
+                clicked_markers = new atlas.source.DataSource();
+                map.sources.add(clicked_markers);
 
                 //Add a layer for rendering point data.
-                var searchLayer = new atlas.layer.SymbolLayer(datasource, null, {
+                var searchLayer = new atlas.layer.SymbolLayer(clicked_markers, null, {
                     iconOptions: {
                         image: 'pin-round-darkblue',
                         anchor: 'center',
                         allowOverlap: true,
-                        opacity : 0
+                        opacity : 1
                     },
                     textOptions: {
                         anchor: "top"
@@ -81,6 +86,12 @@
 
                 map.layers.add(searchLayer);
 
+                //close search results and popups if map is clicked 
+                map.events.add("click",function(){
+                    popup.close();
+                    resultsPanel.innerHTML = '';
+                });
+                
                 //Add a click event to the search layer and show a popup when a result is clicked.
                 map.events.add("click", searchLayer, function (e) {
                     //Make sure the event occurred on a shape feature.
@@ -160,12 +171,12 @@
         function itemHovered(id) {
             //Show a popup when hovering an item in the result list.
             var shape = datasource.getShapeById(id);
-            console.log(shape)
             showPopup(shape);
         }
         function itemClicked(id) {
             //Center the map over the clicked item from the result list.
             var shape = datasource.getShapeById(id);
+            clicked_markers.add(shape);
             map.setCamera({
                 center: shape.getCoordinates(),
                 zoom: 17
