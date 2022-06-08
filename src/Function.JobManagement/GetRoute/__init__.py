@@ -39,11 +39,7 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     destinations = inputProblemData.get("destinations")
 
-    # check if lat/lon information is already included
-    if type(destinations[0]) is dict:
-        extDestinations = destinations
-    else :
-        extDestinations = maps.addCoordinates(destinations)
+    extDestinations = maps.addCoordinates(destinations)
 
     costMatrix = maps.getCostMatrix(extDestinations, inputProblemCrit)
 
