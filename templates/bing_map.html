@@ -28,7 +28,6 @@
 
         //The number of ms between key strokes to wait before performing a search.
         var keyStrokeDelay = 150;
-
         //Create an instance of the map control and set some options.
         function GetMap() {
             map = new atlas.Map('myMap', {
@@ -222,8 +221,8 @@
 
             for (var i = 0; i < markers.length; i++) {
                 //coordinates = markers[i].getCoordinates()
-               // body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress, 'lat': coordinates[1], 'lon': coordinates[0] })
-               body.problem.data.destinations.push(markers[i].data.properties.address.freeformAddress)
+                // body.problem.data.destinations.push({ 'address': markers[i].data.properties.address.freeformAddress, 'lat': coordinates[1], 'lon': coordinates[0] })
+                body.problem.data.destinations.push(markers[i].data.properties.address.freeformAddress)
             }
 
             $.ajax({
@@ -233,16 +232,92 @@
                 data: JSON.stringify(body),
                 contentType: "application/json",
                 dataType: "json",
-                success: function (data) { console.log(data); },
+                success:  function(data){fetchOptimizationResult(data) },
                 error: function (errMsg) {
                     alert(errMsg);
                 }
             });
-            console.log(body)
+            console.log(body);
         }
 
+        function fetchOptimizationResult(data){
+
+            var points = []
+            destinations = data.result.Route
+            console.log(destinations)
+            
+            for(var i=0;i<Object.keys(destinations).length-1;i++)
+            {   
+                    var latlonStart = getLatLon(destinations[i])
+                    var latStart = latlonStart.lat
+                    var lonStart = latlonStart.lon 
+                   
+                    var latlonEnd = getLatLon(destinations[i+1])
+                    var latEnd = latlonEnd.lat
+                    var lonEnd = latlonEnd.lon 
+
+                    route_points = getRoute(latStart, lonStart, latEnd, lonEnd).routes[0].legs[0].points
+
+                    points.push(route_points)
+
+            }
+        }
+        function getLatLon(address) {
+            var params ={};
+            params["api-version"] = 1.0;
+            params.query = address;
+            params["subscription-key"] = "fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U";
 
 
+            var response ;
+            $.ajax({
+                type: "GET",
+                data : params,
+                'async': false,
+                url: "https://atlas.microsoft.com/search/address/json",
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    response = data;
+                },
+                error: function (errMsg) {
+                    console.log(errMsg);
+                }
+            });
+
+            lat = response.results[0].position.lat;
+            lon = response.results[0].position.lon;
+            return {"lat":lat, "lon":lon};
+            
+        }
+
+        function getRoute(latStart, lonStart, latEnd, lonEnd) {
+            var params = {};
+            params["api-version"] = 1.0;
+            params["subscription-key"] = "fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U";
+            params.query = `${latStart},${lonStart.toString()}:${latEnd.toString()},${lonEnd.toString()}`;
+
+            var response;
+            $.ajax({
+                type: "GET",
+                url: "https://atlas.microsoft.com/route/directions/json",
+                data : params,
+                'async': false,
+                // The key needs to match your method's input parameter (case-sensitive).
+                contentType: "application/json",
+                dataType: "json",
+                success: function (data) {
+                    response =  data;
+                },
+                error: function (errMsg) {
+                    alert(errMsg);
+                }
+            });
+
+            return response ;
+
+        }
     </script>
 
     <style>
