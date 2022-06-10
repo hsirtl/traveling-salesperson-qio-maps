@@ -19,9 +19,14 @@
     <!-- Add a reference to the Azure Maps Services Module JavaScript file. -->
     <script src="https://atlas.microsoft.com/sdk/javascript/service/2/atlas-service.min.js"></script>
 
+    <link href="https://atlas.microsoft.com/sdk/javascript/mapcontrol/2/atlas.min.css" rel="stylesheet" />
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+    <!-- Add reference to the animation module. -->
+    <script src="{{url_for('static', filename='azure-maps-animations.min.js')}}"></script>
+
     <script type="text/javascript">
-        var map, datasource, clicked_markers, client, popup, searchInput, resultsPanel, searchInputLength, centerMapOnResults;
+        var map, datasource, clicked_markers, client, popup, searchInput, resultsPanel, searchInputLength, centerMapOnResults, animation;
 
         //The minimum number of characters needed in the search input before a search is performed.
         var minSearchInputLength = 3;
@@ -232,7 +237,7 @@
                 data: JSON.stringify(body),
                 contentType: "application/json",
                 dataType: "json",
-                success:  function(data){fetchOptimizationResult(data) },
+                success: function (data) { fetchOptimizationResult(data) },
                 error: function (errMsg) {
                     alert(errMsg);
                 }
@@ -240,39 +245,55 @@
             console.log(body);
         }
 
-        function fetchOptimizationResult(data){
+        function fetchOptimizationResult(data) {
 
             var points = []
             destinations = data.result.Route
             console.log(destinations)
-            
-            for(var i=0;i<Object.keys(destinations).length-1;i++)
-            {   
-                    var latlonStart = getLatLon(destinations[i])
-                    var latStart = latlonStart.lat
-                    var lonStart = latlonStart.lon 
-                   
-                    var latlonEnd = getLatLon(destinations[i+1])
-                    var latEnd = latlonEnd.lat
-                    var lonEnd = latlonEnd.lon 
 
-                    route_points = getRoute(latStart, lonStart, latEnd, lonEnd).routes[0].legs[0].points
+            for (var i = 0; i < Object.keys(destinations).length - 1; i++) {
+                console.log(destinations[i])
+                var latlonStart = getLatLon(destinations[i])
+                var latStart = latlonStart.lat
+                var lonStart = latlonStart.lon
 
-                    points.push(route_points)
+                var latlonEnd = getLatLon(destinations[i + 1])
+                var latEnd = latlonEnd.lat
+                var lonEnd = latlonEnd.lon
+
+                route_points = getRoute(latStart, lonStart, latEnd, lonEnd).routes[0].legs[0].points
+                
+                for(var j=0;j<route_points.length;j++)
+                {
+                    points.push([route_points[j].longitude,route_points[j].latitude])
+                }
+                console.log(route_points.length)
 
             }
+            console.log(points.length)
+            line = new atlas.Shape(new atlas.data.LineString(points));
+            //Add the data to the data source.
+            datasource.add(line);
+
+            //Add a layer for rendering line data. 
+            map.layers.add(new atlas.layer.LineLayer(datasource, null, {
+                strokeColor: 'red',
+                strokeWidth: 5,
+            }));
+            animation = atlas.animations.snakeline(line, { duration: 10000, easing: 'easeInCubic', autoPlay: true });
+            console.log(line)
         }
         function getLatLon(address) {
-            var params ={};
+            var params = {};
             params["api-version"] = 1.0;
             params.query = address;
             params["subscription-key"] = "fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U";
 
 
-            var response ;
+            var response;
             $.ajax({
                 type: "GET",
-                data : params,
+                data: params,
                 'async': false,
                 url: "https://atlas.microsoft.com/search/address/json",
                 // The key needs to match your method's input parameter (case-sensitive).
@@ -288,8 +309,8 @@
 
             lat = response.results[0].position.lat;
             lon = response.results[0].position.lon;
-            return {"lat":lat, "lon":lon};
-            
+            return { "lat": lat, "lon": lon };
+
         }
 
         function getRoute(latStart, lonStart, latEnd, lonEnd) {
@@ -302,20 +323,20 @@
             $.ajax({
                 type: "GET",
                 url: "https://atlas.microsoft.com/route/directions/json",
-                data : params,
+                data: params,
                 'async': false,
                 // The key needs to match your method's input parameter (case-sensitive).
                 contentType: "application/json",
                 dataType: "json",
                 success: function (data) {
-                    response =  data;
+                    response = data;
                 },
                 error: function (errMsg) {
                     alert(errMsg);
                 }
             });
 
-            return response ;
+            return response;
 
         }
     </script>
