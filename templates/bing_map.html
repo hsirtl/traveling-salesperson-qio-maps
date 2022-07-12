@@ -28,6 +28,10 @@
     <script type="text/javascript">
         var map, datasource, clicked_markers, client, popup, searchInput, resultsPanel, searchInputLength, centerMapOnResults, animation;
 
+
+        var azure_maps_subscription_key = ''
+
+
         //The minimum number of characters needed in the search input before a search is performed.
         var minSearchInputLength = 3;
 
@@ -42,7 +46,7 @@
                 language: 'en-US',
                 authOptions: {
                     authType: 'subscriptionKey',
-                    subscriptionKey: 'fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U'
+                    subscriptionKey: azure_maps_subscription_key
                 }
             });
 
@@ -287,7 +291,7 @@
             var params = {};
             params["api-version"] = 1.0;
             params.query = address;
-            params["subscription-key"] = "fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U";
+            params["subscription-key"] = azure_maps_subscription_key;
 
 
             var response;
@@ -316,7 +320,7 @@
         function getRoute(latStart, lonStart, latEnd, lonEnd) {
             var params = {};
             params["api-version"] = 1.0;
-            params["subscription-key"] = "fEMMlWbDmfQyB2D8anmy39It-CSHGsr14toYxGIlU8U";
+            params["subscription-key"] = azure_maps_subscription_key;
             params.query = `${latStart},${lonStart.toString()}:${latEnd.toString()},${lonEnd.toString()}`;
 
             var response;
