@@ -1,0 +1,22 @@
+###
+get https://aquademos.azurewebsites.net/api/GetRoute HTTP/1.1
+Content-Type: application/json
+
+{
+    "problem": {
+        "type": "travelingsalesperson",
+        "optimizeBy": "travelTimeInSeconds",
+        "data": {
+            "destinations": [
+                "Walter-Gropius-Straße 5, 80807 München",
+                "Meitnerstraße 9, 70563 Stuttgart",
+                "Holzmarkt 2a, 50676 Köln",
+                "Axel-Springer-Platz 3, 20355 Hamburg",
+                "Friedrich-Ebert-Anlage 49, 60308 Frankfurt",
+                "Unter den Linden 17, 10117 Berlin",
+                "Altrottstraße 31, 69190 Walldorf"
+            ]
+        }
+    } 
+}
+###
